@@ -114,14 +114,14 @@ function renderContent() {
   h += '<div class="layers">' + SPEC.LAYERS.map(function (l, i) { return '<div style="--lc:' + ['var(--c1)', 'var(--c2)', 'var(--c3)'][i] + '"><span class="eq">' + l.name + ' ＝ ' + l.metaphor + '</span><br><b>' + l.ask + '</b>　<span class="muted">' + l.has + '</span></div>'; }).join('') + '</div>';
   h += '<div class="card"><h3>🎯 影片主題</h3><label class="fld">主題一句話<input data-bind="topic" value="' + esc(state.topic) + '" placeholder="例如：中小企業訓練補助怎麼申請"></label>' +
     '<label class="fld" style="margin-top:.55rem">補充說明 <span class="h">（選填：目標觀眾、一定要講到的重點、要避免的說法）</span><textarea data-bind="brief" rows="2" placeholder="例如：觀眾是 30 人以下公司的老闆，沒時間看公文；要講到申請截止日">' + esc(state.brief) + '</textarea></label></div>';
-  h += '<div class="card"><h3>📎 素材登記表<span class="r"><button class="btn sm" data-act="addMat">＋ 新增素材</button></span></h3>' +
-    '<p class="small muted" style="margin:0 0 .5rem">登記「檔名或網址」就好，檔案不會上傳。要讓 AI 讀到內容，可以按 📝 貼上內容摘錄（會放進 AI 指令）。</p>';
-  if (!state.mats.length) h += '<p class="muted small">還沒有素材。沒有素材也可以做，只是「真實感」低時畫面會用文字卡。</p>';
+  h += '<div class="card" id="matCard"><h3>📎 素材登記表<span class="r"><button class="btn sm" data-act="matPick">📁 選擇檔案</button> <button class="btn sm ghost" data-act="addMat">＋ 填網址／手動新增</button></span></h3>' +
+    '<p class="small muted" style="margin:0 0 .5rem">按「📁 選擇檔案」或把檔案拖進這張卡片（可一次選多個）；網址請按「＋ 填網址」貼上。檔案只在你的瀏覽器裡讀取，<b>不會上傳</b>。文字檔（TXT／MD／CSV／SRT／HTML）與 PDF 會自動讀出文字放進 📝 內容摘錄，讓 AI 讀得到。</p>';
+  if (!state.mats.length) h += '<div class="dropz" data-act="matPick">📁 點這裡選擇檔案，或把檔案拖進來<br><span class="small muted" style="font-weight:400">沒有素材也可以做，只是「真實感」低時畫面會用文字卡。</span></div>';
   else {
     h += '<div class="tw"><table class="t"><thead><tr><th>編號</th><th>檔名或網址</th><th>類型</th><th>角色</th><th>權重</th><th>備註</th><th>權重檢查</th><th></th></tr></thead><tbody>';
     state.mats.forEach(function (m, i) {
       var c = E.weightCheck(m), r = roleOf(m.role);
-      h += '<tr><td class="num">#' + (i + 1) + '</td><td><input class="in" data-bind="mats.' + i + '.src" value="' + esc(m.src) + '" placeholder="補助申請須知.pdf" style="min-width:11rem"></td>' +
+      h += '<tr><td class="num">#' + (i + 1) + '</td><td><div class="srcrow"><input class="in" data-bind="mats.' + i + '.src" value="' + esc(m.src) + '" placeholder="檔名或 https:// 網址" style="min-width:11rem"><button class="icon-btn" data-act="matPick" data-i="' + i + '" title="選擇檔案">📁</button></div>' + (m.size ? '<span class="small muted">' + esc(m.size) + '・只存檔名</span>' : '') + '</td>' +
         '<td><select class="in" data-bind="mats.' + i + '.type">' + opts(SPEC.MAT_TYPES, m.type) + '</select></td>' +
         '<td><select class="in" data-bind="mats.' + i + '.role" style="border-left:4px solid ' + (r ? r.color : '#999') + '">' + opts(SPEC.ROLES.map(function (x) { return x.name; }), m.role) + '</select></td>' +
         '<td><input class="in" type="number" min="0" max="100" data-bind="mats.' + i + '.weight" value="' + esc(m.weight) + '" style="width:4.5rem" title="建議 ' + (r ? r.range.join('–') : '') + '"></td>' +
@@ -533,6 +533,7 @@ var acts = {
   addMat: function () { if (state.mats.length >= 30) { toast('最多 30 份素材'); return; } state.mats.push({src: '', type: 'PDF', role: '事實依據', weight: 90, note: '', excerpt: ''}); save(); render(); var l = document.querySelectorAll('[data-bind$=".src"]'); if (l.length) l[l.length - 1].focus(); },
   delMat: function (i) { var m = state.mats[i]; var go_ = function () { state.mats.splice(i, 1); openExcerpt = {}; save(); render(); toast('已刪除素材，後面的編號往前遞補；分鏡裡的「素材 #編號」請自行確認'); }; if ((m.src || m.excerpt || '').trim()) confirmBox('刪除素材', '要刪除素材 #' + (i + 1) + '「' + esc(m.src) + '」嗎？', '刪除', go_); else go_(); },
   matUp: function (i) { moveIn(state.mats, i, -1); openExcerpt = {}; save(); render(); },
+  matPick: function (i) { matTarget = (typeof i === 'number' && !isNaN(i)) ? i : -1; var f = $('matIn'); f.multiple = matTarget < 0; f.value = ''; f.click(); },
   toggleEx: function (i) { openExcerpt[i] = !openExcerpt[i]; render(); },
   resetSegs: function () { state.segs = null; save(); render(); },
   segL: function (i) { var s = E.segments(state, allTpls()).slice(); moveIn(s, i, -1); state.segs = s; save(); render(); },
@@ -588,7 +589,64 @@ var acts = {
     openModal('<h2>📲 加入主畫面</h2>' + (ios ? '<p>iPhone／iPad：用 Safari 打開，按下方「分享」圖示，選「加入主畫面」。</p>' : '<p>電腦版 Chrome／Edge：按網址列右邊的「安裝」圖示；手機：按瀏覽器「⋮」選「加到主畫面」。</p>') + '<div class="mfoot"><button class="btn" data-act="close">知道了</button></div>');
   }
 };
-var fileMode = 'project';
+var fileMode = 'project', matTarget = -1, EX_MAX = 6000;
+function matTypeOf(f) {
+  var n = f.name.toLowerCase(), t = f.type || '';
+  if (/\.pdf$/.test(n) || t === 'application/pdf') return 'PDF';
+  if (/^image\//.test(t) || /\.(png|jpe?g|gif|webp|svg|heic|bmp)$/.test(n)) return '圖片';
+  if (/^video\//.test(t) || /\.(mp4|mov|webm|mkv|avi|m4v)$/.test(n)) return '影片';
+  if (/^audio\//.test(t) || /\.(mp3|wav|m4a|aac|ogg|flac)$/.test(n)) return '音檔';
+  if (/\.(txt|md|markdown|csv|tsv|srt|vtt|json|html?|docx?)$/.test(n) || /^text\//.test(t)) return '文字筆記';
+  return '其他';
+}
+function fmtSize(b) { return b >= 1048576 ? (b / 1048576).toFixed(1) + ' MB' : Math.max(1, Math.round(b / 1024)) + ' KB'; }
+var pdfLib = null;
+function loadPdfJs() {
+  if (pdfLib) return pdfLib;
+  pdfLib = new Promise(function (ok, no) {
+    var sc = document.createElement('script'), base = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+    sc.src = base + 'pdf.min.js';
+    sc.onload = function () { window.pdfjsLib.GlobalWorkerOptions.workerSrc = base + 'pdf.worker.min.js'; ok(window.pdfjsLib); };
+    sc.onerror = function () { pdfLib = null; no(new Error('PDF 讀取元件載入失敗')); };
+    document.head.appendChild(sc);
+  });
+  return pdfLib;
+}
+function readExcerpt(f) {
+  var n = f.name.toLowerCase();
+  if (/\.(txt|md|markdown|csv|tsv|srt|vtt|json)$/.test(n) || /^text\/(plain|markdown|csv)/.test(f.type)) return f.text();
+  if (/\.html?$/.test(n)) return f.text().then(function (t) { var d = new DOMParser().parseFromString(t, 'text/html'); return (d.body ? d.body.textContent : t).replace(/\n\s*\n+/g, '\n\n'); });
+  if (matTypeOf(f) === 'PDF') return loadPdfJs().then(function (lib) { return f.arrayBuffer().then(function (buf) { return lib.getDocument({data: buf, cMapUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/cmaps/', cMapPacked: true, standardFontDataUrl: 'https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/standard_fonts/'}).promise; }); }).then(function (doc) {
+    var out = [], p = Promise.resolve();
+    for (var k = 1; k <= Math.min(doc.numPages, 30); k++) (function (k) { p = p.then(function () { return doc.getPage(k).then(function (pg) { return pg.getTextContent(); }).then(function (tc) { out.push(tc.items.map(function (it) { return it.str + (it.hasEOL ? '\n' : ''); }).join('')); }); }); })(k);
+    return p.then(function () { return out.join('\n\n'); });
+  });
+  return Promise.resolve('');
+}
+function addMatFiles(files, target) {
+  files = Array.prototype.slice.call(files || []); if (!files.length) return;
+  if (target < 0 && state.mats.length + files.length > 30) { toast('最多 30 份素材'); files = files.slice(0, Math.max(0, 30 - state.mats.length)); if (!files.length) return; }
+  var pending = 0, got = 0, fail = 0;
+  files.forEach(function (f, k) {
+    var ty = matTypeOf(f), txt = ty === 'PDF' || ty === '文字筆記', m;
+    if (target >= 0 && k === 0 && state.mats[target]) { m = state.mats[target]; m.src = f.name; m.type = ty; }
+    else { m = {src: f.name, type: ty, role: txt ? '事實依據' : '必用素材', weight: txt ? 90 : 85, note: '', excerpt: ''}; state.mats.push(m); }
+    m.size = fmtSize(f.size);
+    if (/\.docx?$/i.test(f.name)) return;
+    if (txt) {
+      pending++;
+      readExcerpt(f).then(function (t) {
+        t = (t || '').replace(/\r/g, '').replace(/[ \t]+\n/g, '\n').trim();
+        if (t && !(m.excerpt || '').trim()) { m.excerpt = t.length > EX_MAX ? t.slice(0, EX_MAX) + '\n…（以下省略，原文共 ' + t.length + ' 字）' : t; got++; }
+        else if (!t) fail++;
+      }).catch(function () { fail++; }).then(function () {
+        if (--pending === 0) { save(); render(); toast('已讀出 ' + got + ' 份文字放進 📝 內容摘錄' + (fail ? '；' + fail + ' 份讀不到文字（掃描檔請自行貼上重點）' : '')); }
+      });
+    }
+  });
+  save(); render();
+  toast(pending ? '已登記 ' + files.length + ' 份素材，正在讀取文字…' : '已登記 ' + files.length + ' 份素材（檔案不會上傳）');
+}
 document.addEventListener('click', function (e) {
   var t = e.target.closest('[data-act],[data-tab],[data-tpl],[data-jump],button[data-fs]'); if (!t) return;
   if (t.dataset.tab) { go(t.dataset.tab); return; }
@@ -602,6 +660,16 @@ document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape' && $('modal').classList.contains('show')) closeModal();
   if (e.key === 'Enter' && e.target.id === 'askIn') acts.modalOk();
   if (e.key === 'Enter' && e.target.id === 'newSeg') acts.segAdd();
+});
+$('matIn').addEventListener('change', function (e) { addMatFiles(e.target.files, matTarget); });
+['dragover', 'dragleave', 'drop'].forEach(function (ev) {
+  document.addEventListener(ev, function (e) {
+    var c = e.target.closest && e.target.closest('#matCard'); if (!c) return;
+    if (!e.dataTransfer || Array.prototype.indexOf.call(e.dataTransfer.types || [], 'Files') < 0) return;
+    e.preventDefault();
+    if (ev === 'dragover') c.classList.add('drag'); else c.classList.remove('drag');
+    if (ev === 'drop') addMatFiles(e.dataTransfer.files, -1);
+  });
 });
 $('fileIn').addEventListener('change', function (e) {
   var f = e.target.files[0]; if (!f) return;

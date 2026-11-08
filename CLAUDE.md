@@ -17,6 +17,7 @@
 - `E.draftShots()`：節奏 → 每鏡秒數（各等級區間內插）→ 鏡頭數；頭尾段落權重 0.6；S5 決定畫面來源；S6 高且無行動呼籲段落會補一段；必用素材保證出現（logo 放最後一鏡，且不參與一般輪播）；秒數微調到總長＝採用長度。旁白以 `【草稿】` 開頭＝未寫，不進 SRT、不算字數。
 - `E.parseShots()`：吃 JSON 陣列／物件（shots）、```json 圍欄、Markdown 表格、Excel Tab 表格；中英文欄位名都認，fade/zoom 等會轉成選項。
 - `E.recipe()`：配方 JSON，schema `ai-video-recipe/1`。
+- 素材登記表（app.js `addMatFiles`）：📁 選擇檔案／拖放多檔，只記檔名＋大小、檔案不上傳；類型依副檔名判斷；TXT／MD／CSV／SRT／HTML 與 PDF 自動讀文字進內容摘錄（上限 6000 字、PDF 前 30 頁）。PDF 用 cdnjs pdf.js 3.11.174 延遲載入，**中文 PDF 必須帶 cMapUrl，而 cdnjs 的 cmaps 會回 403，所以 cmaps／standard_fonts 改走 jsDelivr `pdfjs-dist@3.11.174`**。Word 不讀。
 - 改引擎一定要跑 `node tools/test_engine.mjs`。
 
 ## 標準配備
