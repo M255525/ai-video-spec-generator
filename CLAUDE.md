@@ -10,7 +10,8 @@
 - `SPEC.TEMPLATES`：6 個模板（段落、S1–S6 預設、建議長度）；使用者可「存成我的模板」（localStorage `vsg.tpls`）。
 - `SPEC.ROLES`：事實依據／必用素材／風格參考／靈感來源與建議權重範圍。
 - `SPEC.MODULES`：腳本分鏡／配音／畫面／字幕／合成輸出。
-- `SPEC.EXAMPLES`：5 個範例，第一個＝規格表示範（政策型、S3 自訂 60、5 鏡 24 秒）。範例內容全虛構。
+- `SPEC.EXAMPLES`：5 個**完整**範例（brief、segs、len、ov、adv、mats 含 excerpt、寫好旁白的 shots），由 `E.fromExample()` 轉成狀態；第一個＝規格表示範的完整版（政策型、S3 自訂 60、加「鉤子」段、90 秒 19 鏡）。`test_engine.mjs` 要求每個範例檢查清單全部通過。範例內容全虛構。
+- `samples/`：範例素材 .txt，由 `node tools/build_samples.js` 從範例的 excerpt 產生（改範例素材後要重跑）。
 
 ## 引擎重點（engine.js）
 - `E.prompt()` 第一段**必須和規格表「配方試算」A20 的句型逐字一致**（測試有比對），後面才附加素材規則、進階設定、輸出格式（JSON 或 Markdown 表格）。

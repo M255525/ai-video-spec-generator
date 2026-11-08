@@ -21,6 +21,22 @@
     };
   };
 
+  /* 範例 → 完整專案狀態（五個步驟都填好） */
+  E.fromExample = function (x, speed) {
+    var s = E.blankState();
+    s.name = x.name; s.topic = x.topic; s.brief = x.brief || ''; s.tpl = x.tpl;
+    if (x.segs) s.segs = x.segs.slice();
+    if (x.len) s.lenCustom = x.len;
+    Object.keys(x.ov || {}).forEach(function (k) { s.ov[k] = x.ov[k]; });
+    Object.assign(s.adv, x.adv || {});
+    if (!x.adv || !x.adv.speed) s.adv.speed = speed || '正常';
+    if (x.ratio) s.adv.ratio = x.ratio;
+    Object.assign(s.tools, x.tools || {});
+    s.mats = (x.mats || []).map(function (m) { return Object.assign({src: '', type: '其他', role: '靈感來源', weight: '', note: '', excerpt: ''}, m); });
+    s.shots = (x.shots || []).map(function (r) { return {seg: r[0], narr: r[1], src: r[2], desc: r[3], sec: r[4], trans: r[5], text: r[6]}; });
+    return s;
+  };
+
   E.findTpl = function (tpls, id) {
     for (var i = 0; i < tpls.length; i++) if (tpls[i].id === id) return tpls[i];
     return tpls[0];

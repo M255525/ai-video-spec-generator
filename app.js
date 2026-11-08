@@ -373,15 +373,11 @@ function importShots(append) {
   toast('匯入 ' + list.length + ' 鏡'); go('shots');
 }
 function loadExample(i) {
-  var x = SPEC.EXAMPLES[i], s = E.blankState();
-  s.name = x.name; s.topic = x.topic; s.tpl = x.tpl; s.adv.ratio = x.ratio || '16:9'; s.adv.speed = prefs.defSpeed;
-  Object.keys(x.ov || {}).forEach(function (k) { s.ov[k] = x.ov[k]; });
-  if (x.len) s.lenCustom = x.len;
-  s.mats = (x.mats || []).map(function (m) { return Object.assign({src: '', type: '其他', role: '靈感來源', weight: '', note: '', excerpt: ''}, m); });
-  state = s;
-  state.shots = x.shots ? x.shots.map(function (r) { return {seg: r[0], narr: r[1], src: r[2], desc: r[3], sec: r[4], trans: r[5], text: r[6]}; }) : E.draftShots(state, allTpls());
-  openExcerpt = {}; hlShot = -1; saveNow(); $('projName').value = state.name; closeModal(); go(x.shots ? 'output' : 'shots');
-  toast('已載入範例：' + x.name + (x.note ? '' : ''));
+  var x = SPEC.EXAMPLES[i];
+  state = E.fromExample(x, prefs.defSpeed);
+  if (!state.shots.length) state.shots = E.draftShots(state, allTpls());
+  openExcerpt = {}; hlShot = -1; saveNow(); $('projName').value = state.name; closeModal(); go('content');
+  toast('已載入完整範例「' + x.name + '」：五個步驟都填好了，按上方步驟逐一看，或直接到「05 輸出」');
 }
 
 /* ---------- 我的專案 ---------- */
@@ -400,9 +396,13 @@ function openProjects() {
   h += '<div class="mfoot"><button class="btn ghost" data-act="openFile">📂 開啟專案檔（.json）</button><button class="btn ghost" data-act="dlProject">💾 下載目前專案檔</button><button class="btn" data-act="close">關閉</button></div>';
   openModal(h);
 }
+function sampleLinks(x) {
+  var l = (x.mats || []).filter(function (m) { return m.excerpt; });
+  return l.length ? '<br><span class="small">📎 範例素材檔：' + l.map(function (m) { var f = SPEC.sampleName(m); return '<a href="samples/' + encodeURIComponent(f) + '" download="' + esc(f) + '">' + esc(f) + '</a>'; }).join('、') + '</span>' : '';
+}
 function openExamples() {
-  openModal('<h2>📂 範例</h2><p class="small muted">範例內容都是虛構示範。載入會取代目前畫面上的專案（已儲存的專案不受影響）。</p><ul class="list">' + SPEC.EXAMPLES.map(function (x, i) {
-    return '<li><div class="grow"><b>' + esc(x.name) + '</b>　<span class="small muted">' + esc(E.findTpl(allTpls(), x.tpl).name) + '・' + esc(x.ratio) + '</span><br><span class="small muted">' + esc(x.note) + '</span></div><button class="btn sm" data-act="loadEx" data-i="' + i + '">載入</button></li>';
+  openModal('<h2>📂 範例</h2><p class="small muted">每個範例都把五個步驟填好了：主題與補充說明、素材（含內容摘錄）、結構、滑桿、進階設定、寫好旁白的完整分鏡，檢查清單全部通過。內容都是虛構示範。載入會取代目前畫面上的專案（已儲存的專案不受影響）。想練習上傳，可以先下載「範例素材檔」，再到「01 內容」按 📁 選擇檔案。</p><ul class="list">' + SPEC.EXAMPLES.map(function (x, i) {
+    return '<li><div class="grow"><b>' + esc(x.name) + '</b>　<span class="small muted">' + esc(E.findTpl(allTpls(), x.tpl).name) + '・' + esc((x.adv && x.adv.ratio) || x.ratio || '16:9') + '・' + (x.len || E.findTpl(allTpls(), x.tpl).len) + ' 秒・' + (x.shots || []).length + ' 鏡</span><br><span class="small muted">' + esc(x.note) + '</span>' + sampleLinks(x) + '</div><button class="btn sm" data-act="loadEx" data-i="' + i + '">載入</button></li>';
   }).join('') + '</ul><div class="mfoot"><button class="btn" data-act="close">關閉</button></div>');
 }
 

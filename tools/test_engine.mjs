@@ -36,4 +36,13 @@ let threw = false; try { E.parseShots('hello'); } catch (e) { threw = true; } ok
 // SRT 略過草稿
 { const s = E.blankState(); s.shots = [{seg: 'a', narr: '【草稿】x', sec: 2}, {seg: 'b', narr: '真的', sec: 3}]; ok(E.srt(s).includes('00:00:02,000 --> 00:00:05,000'), 'srt timing'); }
 console.log(fail ? fail + ' failed' : 'all passed');
+// 範例必須完整：主題、補充說明、分鏡都有，檢查清單全部通過
+for (const x of SPEC.EXAMPLES) {
+  const s = E.fromExample(x, '正常');
+  ok(s.brief && s.shots.length >= 10, `example ${x.name} complete`);
+  ok(s.shots.every(r => !E.isDraft(r.narr) && SPEC.SOURCES.includes(r.src) && SPEC.TRANSITIONS.includes(r.trans) && r.seg && r.text), `example ${x.name} shot fields`);
+  const bad = E.checks(s, T).filter(c => c[0] !== 'ok');
+  ok(!bad.length, `example ${x.name} checks: ` + JSON.stringify(bad));
+}
+
 process.exit(fail ? 1 : 0);
