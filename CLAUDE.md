@@ -3,7 +3,7 @@
 依使用者提供的「萬用AI影片引擎_設計規格表.xlsx」（三層架構＋6 核心滑桿＋結構模板庫＋素材角色＋鏡頭骨架＋配方試算＋生成模組）做成的單頁工具。2026-11-08 建立。**本工具只產生規格／分鏡／AI 指令，不生成影片。**
 
 - 純靜態：`index.html`（CSS）＋`data.js`（規格資料）＋`engine.js`（規則式引擎，Node 可跑）＋`app.js`（介面）＋`manual.html`＋PWA。
-- 本機預覽 port **8867**（`python -m http.server 8867`）。尚未上線；`.github/workflows/pages.yml` 已備好（push master 自動部署），預計網址 <https://m255525.github.io/ai-video-spec-generator/>，visitor-badge `m255525.aivideospecgenerator`。
+- 本機預覽 port **8867**（`python -m http.server 8867`）。2026-11-08 已上線 GitHub Pages（`pages.yml`，push master 自動部署；環境分支規則已補 master）： <https://m255525.github.io/ai-video-spec-generator/>，visitor-badge `m255525.aivideospecgenerator`。
 
 ## 規格對應（改 `data.js` 就好）
 - `SPEC.SLIDERS`：S1–S6，0–33 低／34–66 中／67–100 高，`ins[等級]` 是送給 AI 的指令。
