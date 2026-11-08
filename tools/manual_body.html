@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>AI 影片規格產生器・操作手冊</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700;900&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#16171A;--sub:#585A61;--bg:#F2EFE7;--paper:#FFFDF8;--line:#D8D2C3;--rec:#D7392B;--c1:#B4540A;--c2:#0F7468;--c3:#5B3FA8;--c4:#1F4E9C}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:'Noto Sans TC','Microsoft JhengHei',sans-serif;font-size:16px;line-height:1.75}
+header{background:var(--ink);color:#fff}
+header .s{height:10px;background:repeating-linear-gradient(-45deg,#fff 0 14px,var(--ink) 14px 28px)}
+header div.t{max-width:860px;margin:0 auto;padding:14px 16px}
+header h1{margin:0;font-size:26px;font-weight:900}
+header a{color:#fff}
+main{max-width:860px;margin:0 auto;padding:8px 16px 48px}
+h2{font-size:20px;margin:0 0 6px;font-weight:900}
+section{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:12px 18px 14px;margin-top:14px}
+a{color:var(--c4);font-weight:700}
+li{margin:4px 0}
+ol,ul{padding-left:1.3em}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th,td{border:1px solid var(--line);padding:4px 8px;text-align:left;vertical-align:top}
+th{background:#EFEADD;white-space:nowrap}
+.tw{overflow-x:auto}
+code,.mono{font-family:'JetBrains Mono',Consolas,monospace;font-size:.88em;background:#EFEADD;border-radius:4px;padding:0 4px}
+.step{display:inline-block;font-family:'JetBrains Mono',monospace;font-weight:700;color:#fff;border-radius:4px;padding:0 6px;margin-right:6px;font-size:13px}
+.warn{border-left:5px solid var(--rec)}
+@media print{body{background:#fff}section{break-inside:avoid}header .s{display:none}}
+</style>
+</head>
+<body>
+<header><div class="s"></div><div class="t"><h1>AI 影片規格產生器・操作手冊</h1><a href="index.html">← 回到工具</a></div></header>
+<main>
+
+<section>
+<h2>這是什麼</h2>
+<p>做 AI 影片時，最常卡在「不知道要怎麼跟 AI 講清楚」。這個工具把一支影片拆成三層，各自設定、再組合起來：</p>
+<div class="tw"><table>
+<tr><th>層</th><th>負責什麼</th><th>比喻</th><th>包含的設定</th></tr>
+<tr><td><b style="color:var(--c1)">內容層</b></td><td>講什麼</td><td>食材</td><td>主題、事實依據、素材、參考資料</td></tr>
+<tr><td><b style="color:var(--c2)">結構層</b></td><td>怎麼排</td><td>食譜</td><td>段落順序、鏡頭數、影片長度</td></tr>
+<tr><td><b style="color:var(--c3)">風格層</b></td><td>什麼感覺</td><td>調味</td><td>6 個核心滑桿、配音聲線、視覺風格、配樂</td></tr>
+</table></div>
+<p>三層各自獨立，同一份內容換結構或風格，就能產出不同的影片。最後會得到：<b>分鏡表、給 AI 的完整指令、配方 JSON、分鏡 CSV、字幕 SRT、規格書</b>。</p>
+<p>本工具<b>不會實際生成影片</b>，它產出的是「規格」，讓你拿去給 AI 或剪輯工具照著做。</p>
+</section>
+
+<section>
+<h2>五個步驟</h2>
+<ol>
+<li><span class="step" style="background:var(--c1)">01 內容</span>填影片主題（一句話），需要的話寫補充說明。在「素材登記表」登記要用的檔案或網址，每份都要選<b>角色</b>和<b>權重</b>。素材檔不會上傳；要讓 AI 讀到內容，按 📝 貼上「內容摘錄」。</li>
+<li><span class="step" style="background:var(--c2)">02 結構</span>從 6 個模板選一個（故事型、教學型、案例警示型、產品介紹型、政策／補助解說型、知識短影音型）。段落可以改名、前後移動、刪除或新增；長度可以自訂。調好的設定可以按「存成我的模板」。</li>
+<li><span class="step" style="background:var(--c3)">03 風格</span>6 個滑桿的數字<b>留白就沿用模板預設</b>，拖動或輸入數字就是自訂。每個滑桿下方會即時顯示這個等級要送給 AI 的指令。「進階設定」可以設畫面比例、字幕樣式、配音聲線、配樂、品牌元素。</li>
+<li><span class="step" style="background:var(--c4)">04 分鏡</span>按「⚡ 依配方排出分鏡草稿」，工具會依長度、段落和滑桿算出鏡頭數、每鏡秒數、畫面來源、轉場和畫面文字。旁白先放【草稿】提示，再自己改，或交給 AI 寫。下方「檢查清單」會提醒總長不對、旁白太長、必用素材沒出現等問題。</li>
+<li><span class="step" style="background:var(--rec)">05 輸出</span>複製「組合好的 AI 指令」貼到 ChatGPT／Gemini／Claude，AI 回的分鏡貼回「貼回 AI 的分鏡」就會填進分鏡表。也可以下載配方 JSON、分鏡 CSV、字幕 SRT、規格書，或列印成 PDF。</li>
+</ol>
+<p>右側（手機在下方）的<b>配方卡</b>隨時顯示目前的模板、長度、6 個滑桿和待處理的問題。橘色條＝已自訂，紫色條＝沿用模板。</p>
+</section>
+
+<section>
+<h2>6 個核心滑桿</h2>
+<p>數值 0–33＝低、34–66＝中、67–100＝高，每一級對應一句指令。</p>
+<div class="tw"><table>
+<tr><th>代碼</th><th>滑桿</th><th>0 端 → 100 端</th><th>影響</th></tr>
+<tr><td>S1</td><td>情緒張力</td><td>冷靜理性 → 戲劇化</td><td>腳本語氣、配樂、轉場</td></tr>
+<tr><td>S2</td><td>資訊密度</td><td>輕鬆帶過 → 塞滿重點</td><td>腳本字數、畫面文字量</td></tr>
+<tr><td>S3</td><td>節奏</td><td>慢 → 快剪</td><td>鏡頭秒數（低 6–8 秒、中 3–5 秒、高 1.5–3 秒）、轉場速度</td></tr>
+<tr><td>S4</td><td>專業度</td><td>白話 → 專業術語</td><td>腳本用詞</td></tr>
+<tr><td>S5</td><td>真實感</td><td>全用實拍素材 → 全部 AI 生成</td><td>畫面來源（素材／AI 生成／文字卡）的比例</td></tr>
+<tr><td>S6</td><td>行動呼籲強度（CTA）</td><td>不提 → 強力推動</td><td>結尾段落、畫面文字；高的時候若模板沒有「行動呼籲」段落會自動補一段</td></tr>
+</table></div>
+</section>
+
+<section>
+<h2>素材角色與權重</h2>
+<div class="tw"><table>
+<tr><th>角色</th><th>定義</th><th>AI 可以做</th><th>AI 不可以做</th><th>建議權重</th></tr>
+<tr><td>事實依據</td><td>內容只能從這裡取</td><td>摘要、引用、轉述數據</td><td>自行補充或編造事實</td><td>70–100</td></tr>
+<tr><td>必用素材</td><td>一定要出現在畫面裡</td><td>裁切、加字、套動態效果</td><td>省略不用、大幅變形</td><td>80–100</td></tr>
+<tr><td>風格參考</td><td>只學感覺，不直接使用</td><td>模仿節奏、色調、構圖、語氣</td><td>直接放進影片、照抄內容</td><td>30–70</td></tr>
+<tr><td>靈感來源</td><td>AI 可以自由發揮</td><td>延伸、改寫、重新詮釋</td><td>（限制最少）</td><td>10–50</td></tr>
+</table></div>
+<ul>
+<li>事實依據權重 70 以上時，AI 指令會要求每句話標出［來源 #編號］。</li>
+<li>分鏡的畫面描述寫「素材 #編號」，檢查清單才認得出用了哪一份素材。</li>
+<li>刪除素材後，後面的編號會往前遞補，分鏡裡的編號請自行確認。</li>
+</ul>
+</section>
+
+<section>
+<h2>貼回 AI 的分鏡</h2>
+<p>指令預設要求 AI 用 JSON 回傳。把 AI 的回覆整段貼到「輸出 → 貼回 AI 的分鏡」，按「取代目前分鏡」或「接在後面」。也可以貼：</p>
+<ul>
+<li>Markdown 表格（第一列要有「段落」「旁白」）</li>
+<li>從 Excel 複製的表格（Tab 分隔）</li>
+</ul>
+<p>畫面來源、轉場如果 AI 寫成英文（例如 fade、zoom），會自動轉成工具的選項。</p>
+<p><b>選用：AI 金鑰。</b>在「⚙ 常用設定 → AI 金鑰」填入 Gemini／OpenAI／Claude／OpenRouter 的金鑰（或本機 Ollama 等 OpenAI 相容端點），「輸出」頁的「✨ 用我的 AI 金鑰直接排分鏡」就能一鍵完成。金鑰只存在你的瀏覽器，由瀏覽器直接呼叫供應商，費用算在你的帳號。</p>
+</section>
+
+<section>
+<h2>輸出檔案</h2>
+<div class="tw"><table>
+<tr><th>檔案</th><th>用途</th></tr>
+<tr><td>配方 JSON</td><td>給後面的生成模組（腳本分鏡、配音、畫面、字幕、合成）。每個模組只讀自己需要的欄位，換工具時只換那一個模組。格式代號 <code>ai-video-recipe/1</code>。</td></tr>
+<tr><td>分鏡 CSV</td><td>用 Excel 開啟，含開始／結束時間。</td></tr>
+<tr><td>字幕 SRT</td><td>依每鏡秒數估算時間，草稿旁白不會放進去。配好音後，請把每鏡秒數改成實際音檔長度再匯出一次。</td></tr>
+<tr><td>規格書 Markdown／列印</td><td>三層設定、滑桿表、分鏡表與 AI 指令整理成一份，可以給團隊或客戶確認。列印時選「另存為 PDF」。</td></tr>
+<tr><td>專案檔</td><td>之後可以用「我的專案 → 開啟專案檔」再打開繼續編輯。</td></tr>
+</table></div>
+</section>
+
+<section>
+<h2>儲存與備份</h2>
+<ul>
+<li>畫面上的專案會自動存在瀏覽器裡，關掉再開還在。</li>
+<li>按上方「💾 儲存」會存到「🗂 我的專案」，可以存很多個（最多 50 個）。</li>
+<li>換電腦或清除瀏覽器資料之前，請到「⚙ 常用設定 → 資料與備份」下載全部備份（AI 金鑰不會放進備份）。</li>
+</ul>
+</section>
+
+<section class="warn">
+<h2>使用警語</h2>
+<ul>
+<li>本工具只產生影片規格、分鏡與給 AI 的指令，不會實際生成或合成影片。</li>
+<li>AI 寫出的腳本可能有錯誤或捏造內容；事實、數字、法規、補助金額請以官方或原始資料為準，發布前務必人工查核。</li>
+<li>素材請確認有使用權；別人的作品只能當「風格參考」，不可直接放進影片或照抄。人物照片要取得當事人同意。</li>
+<li>專案資料只存在你的瀏覽器，不會上傳到本工具的伺服器。</li>
+<li>範例內容皆為虛構示範。</li>
+</ul>
+</section>
+
+<section id="creator">
+<h2>關於創作者</h2>
+{{CREATOR}}
+</section>
+
+</main>
+</body>
+</html>
