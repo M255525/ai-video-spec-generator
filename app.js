@@ -1,4 +1,6 @@
 'use strict';
+/* Gemini 已下架／不存在的模型 ID 自動換成現役模型（2026-11 體檢）：新申請的 AI Studio 金鑰呼叫 2.5／2.0 系列會被拒；也順便去掉多打的空白與 models/ 前綴 */
+function geminiModelFix(m){var r={'gemini-2.5-flash': 'gemini-3.6-flash', 'gemini-2.5-flash-lite': 'gemini-3.5-flash-lite', 'gemini-2.5-pro': 'gemini-3.8-flash', 'gemini-2.0-flash': 'gemini-3.6-flash', 'gemini-2.0-flash-001': 'gemini-3.6-flash', 'gemini-2.0-flash-lite': 'gemini-3.1-flash-lite', 'gemini-1.5-flash': 'gemini-3.6-flash', 'gemini-1.5-pro': 'gemini-3.1-pro-preview', 'gemini-3-pro': 'gemini-3.1-pro-preview', 'gemini-3-pro-preview': 'gemini-3.1-pro-preview', 'gemini-3.5-pro': 'gemini-3.1-pro-preview', 'gemini-3.1-flash-lite-preview': 'gemini-3.1-flash-lite'};m=String(m||'').trim().replace(/^models\//,'');return r[m]||m;}
 /* AI 影片規格產生器：介面。資料只存在這個瀏覽器（localStorage，鍵前綴 vsg.）。
    AI 金鑰（選用）只存本機，由瀏覽器直接呼叫供應商，不經過任何伺服器。 */
 
@@ -416,7 +418,7 @@ var WARN_HTML = '<h2>⚠ 使用警語</h2><ul>' +
   '<li>範例內容皆為虛構示範，不代表任何真實機構或產品。</li></ul>';
 function showWarn() { openModal(WARN_HTML + '<div class="mfoot"><button class="btn" data-act="close">我知道了</button></div>'); }
 var PROVIDERS = {
-  gemini: {label: 'Gemini（Google AI Studio）', models: [['gemini-3.5-flash', 'Gemini 3.5 Flash（均衡，推薦）'], ['gemini-3.5-pro', 'Gemini 3.5 Pro（最強）'], ['gemini-2.5-flash', 'Gemini 2.5 Flash（快速省錢）']]},
+  gemini: {label: 'Gemini（Google AI Studio）', models: [['gemini-3.5-flash', 'Gemini 3.5 Flash（均衡，推薦）'], ['gemini-3.1-pro-preview', 'Gemini 3.1 Pro 預覽版（最強）'], ['gemini-3.5-flash-lite', 'Gemini 3.5 Flash-Lite（快速省錢）']]},
   openai: {label: 'OpenAI', url: 'https://api.openai.com/v1/chat/completions', models: [['gpt-5-mini', 'GPT-5 mini（均衡，推薦）'], ['gpt-5', 'GPT-5（最強）'], ['gpt-4o-mini', 'GPT-4o mini（快速省錢）']]},
   claude: {label: 'Claude（Anthropic）', models: [['claude-sonnet-5-5', 'Claude Sonnet 5.5（均衡，推薦）'], ['claude-opus-5-5', 'Claude Opus 5.5（最強）'], ['claude-haiku-5-5', 'Claude Haiku 5.5（快速省錢）']]},
   openrouter: {label: 'OpenRouter', url: 'https://openrouter.ai/api/v1/chat/completions', models: [['openai/gpt-4o-mini', 'OpenAI GPT-4o mini（推薦）'], ['google/gemini-2.5-flash', 'Google Gemini 2.5 Flash'], ['anthropic/claude-sonnet-4.5', 'Anthropic Claude Sonnet 4.5']]},
@@ -463,7 +465,7 @@ async function callLLM(prompt) {
     body = {model: model, max_tokens: 8000, messages: [{role: 'user', content: prompt}]};
     extract = function (d) { return (d.content || []).filter(function (b) { return b.type === 'text'; }).map(function (b) { return b.text; }).join(''); };
   } else if (provider === 'gemini') {
-    url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(model) + ':generateContent';
+    url = 'https://generativelanguage.googleapis.com/v1beta/models/' + encodeURIComponent(geminiModelFix(model)) + ':generateContent';
     headers = {'content-type': 'application/json', 'x-goog-api-key': key};
     body = {contents: [{parts: [{text: prompt}]}], generationConfig: {responseMimeType: 'application/json'}};
     extract = function (d) { var parts = (d.candidates && d.candidates[0] && d.candidates[0].content && d.candidates[0].content.parts) || []; return parts.map(function (p) { return p.text || ''; }).join(''); };
